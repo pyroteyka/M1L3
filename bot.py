@@ -37,13 +37,26 @@ def send_help(message: Message):
         "Или просто напиши что-нибудь, я повторю!"
     )
 
-# Ответ на стикеры (почему бы и нет?)
+# Ответ на стикеры
 @bot.message_handler(content_types=["sticker"])
 def handle_sticker(message: Message):
     bot.send_sticker(message.chat.id, message.sticker.file_id)
     bot.send_message(message.chat.id, "🥸 Стикер принят. И возвращён!")
 
-# Эхо-сообщения (игнорируем сообщения самого бота)
+# Приветствие новых участников
+@bot.message_handler(content_types=["new_chat_members"])
+def greet_new_user(message: Message):
+    for new_user in message.new_chat_members:
+        bot.send_message(
+            message.chat.id,
+            f"👋 Добро пожаловать, {new_user.first_name}!\nРады видеть тебя здесь."
+        )
+        try:
+            bot.approve_chat_join_request(message.chat.id, new_user.id)
+        except Exception as e:
+            print(f"Не удалось одобрить запрос на вступление: {e}")
+
+# Эхо-сообщения
 @bot.message_handler(func=lambda message: True)
 def copy_message(message: Message):
     if message.from_user.id == bot.get_me().id:
